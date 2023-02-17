@@ -52,7 +52,7 @@ runs:
     - if: ${{inputs.format == 'sarif'}}
       # Run the Python script
       run: |
-        python3 ${{github.action_path}}/SeekerResultsToSarif.py --log_level=${{inputs.log_level}} --outputFile=${{inputs.outputfile}} --url=${{inputs.url}} --token=${{inputs.token}} --project=${{inputs.project}} --version=${{inputs.version}} --codeLocationTypeKeys=${{inputs.codeLocationTypeKeys}} --minSeverity=${{inputs.minSeverity}} --onlySeekerVerified=${{inputs.onlySeekerVerified}} --stacktrace=${{inputs.stacktrace}} --customTagNames=${{inputs.customTagNames}}
+        python3 ${{github.action_path}}/seekerResultsToSarif.py --log_level=${{inputs.log_level}} --outputFile=${{inputs.outputfile}} --url=${{inputs.url}} --token=${{inputs.token}} --project=${{inputs.project}} --version=${{inputs.version}} --codeLocationTypeKeys=${{inputs.codeLocationTypeKeys}} --minSeverity=${{inputs.minSeverity}} --onlySeekerVerified=${{inputs.onlySeekerVerified}} --stacktrace=${{inputs.stacktrace}} --customTagNames=${{inputs.customTagNames}}
       shell: bash
     - if: ${{inputs.format == 'pdf'}}
       run: |
