@@ -1,0 +1,64 @@
+name: "Seeker Report Exporter"
+description: "Will use Seeker API to get given project vulnerabilites from Seeker and export options are Sarif and PDF."
+author: Jouni Lehto
+branding:
+  icon: code
+  color: blue
+inputs:
+  log_level:
+    description: Logging level
+    default: DEBUG
+    required: false
+  url:
+    description: Seeker server URL. If not given, then environment variable "SEEKER_SERVER_URL" is used
+    required: false
+  token:
+    description: Seeker Access token to be used. If not given, then environment variable "SEEKER_ACCESS_TOKEN" is used
+    required: false
+  project:
+    description: Seeker project, which vulnerability report will be exported. If not given, then environment variable "SEEKER_PROJECT_KEY" is used
+    required: false
+  version:
+    description: Seeker project version, which vulnerability report will be exported.
+    required: false
+  codeLocationTypeKeys:
+    description: Options are CUSTOMER_CODE_DIRECT_CALLS, CUSTOMER_CODE_NESTED_CALLS and THIRD_PARTY_CODE. All are returned by default. (Works only for Sarif -format output)
+    required: false
+  minSeverity:
+    description: Options are INFORMATIVE, LOW, MEDIUM, HIGH, CRITICAL. All are returned by default.
+    required: false
+  onlySeekerVerified:
+    description: Options are true or false. Will return only Seeker Verfied vulnerabilites.
+    default: false
+    required: false
+  stacktrace:
+    description: Options are true or false. If this is set to true, then possible stacktrace is added into the results.  (Works only for Sarif -format output)
+    default: false
+    required: false
+  customTagNames:
+    description: Comma separated list of tag names. If custom tag names are given, then only those vulnerabilities are returned which have given tags.  (Works only for Sarif -format output)
+    required: false
+  outputfile:
+    description: Filename with path where it will be created, example /tmp/SeekerResults.sarif.json
+    default: ${{github.workspace}}/SeekerResults.sarif.json
+    required: false
+
+runs:
+  using: composite
+  env:
+    SEEKER_SERVER_URL: ${{ github.event.inputs.url || env.SEEKER_SERVER_URL }}
+    SEEKER_ACCESS_TOKEN: ${{ github.event.inputs.token || env.SEEKER_ACCESS_TOKEN }}
+    SEEKER_PROJECT_KEY: ${{ github.event.inputs.project || env.SEEKER_PROJECT_KEY }}
+  steps:
+    - if: ${{inputs.format == 'sarif'}}
+      # Run the Python script
+      run: |
+        python3 ${{github.action_path}}/SeekerResultsToSarif.py --log_level=${{inputs.log_level}} --outputFile=${{inputs.outputfile}} --url=${{env.SEEKER_SERVER_URL}} --token=${{env.SEEKER_ACCESS_TOKEN}} --project=${{env.SEEKER_PROJECT_KEY}} --version=${{inputs.version}} --codeLocationTypeKeys=${{inputs.codeLocationTypeKeys}} --minSeverity=${{inputs.minSeverity}} --onlySeekerVerified=${{inputs.onlySeekerVerified}} --stacktrace=${{inputs.stacktrace}} --customTagNames=${{inputs.customTagNames}}
+      shell: bash
+    - if: ${{inputs.format == 'pdf'}}
+      run: |
+        "curl -s -o ${{inputs.outputfile}} -X 'GET' \
+        '${{env.SEEKER_SERVER_URL}}/rest/api/latest/reports/export?language=en&sortField=severity&sortDir=DESC&projectKeys=${{env.SEEKER_PROJECT_KEY}}&projectVersions=${{inputs.version}}&minSeverity=${{inputs.minSeverity}}&onlySeekerVerified=${{inputs.onlySeekerVerified}}' \
+        -H 'accept: application/pdf' \
+        -H 'Authorization: ${{env.SEEKER_ACCESS_TOKEN}}" 
+      shell: bash
