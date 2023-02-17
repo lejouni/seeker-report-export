@@ -10,13 +10,13 @@ inputs:
     default: DEBUG
     required: false
   url:
-    description: Seeker server URL. If not given, then environment variable "SEEKER_SERVER_URL" is used
+    description: Seeker server URL.
     required: false
   token:
-    description: Seeker Access token to be used. If not given, then environment variable "SEEKER_ACCESS_TOKEN" is used
+    description: Seeker Access token to be used.
     required: false
   project:
-    description: Seeker project, which vulnerability report will be exported. If not given, then environment variable "SEEKER_PROJECT_KEY" is used
+    description: Seeker project, which vulnerability report will be exported.
     required: false
   version:
     description: Seeker project version, which vulnerability report will be exported.
@@ -49,21 +49,15 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Set environment variables
-      run: |
-        echo "SEEKER_SERVER_URL=${{ github.event.inputs.url || env.SEEKER_SERVER_URL }}" >> $GITHUB_ENV
-        echo "SEEKER_ACCESS_TOKEN=${{ github.event.inputs.token || env.SEEKER_ACCESS_TOKEN }}" >> $GITHUB_ENV
-        echo "SEEKER_PROJECT_KEY=${{ github.event.inputs.project || env.SEEKER_PROJECT_KEY }}" >> $GITHUB_ENV
-      shell: bash
     - if: ${{inputs.format == 'sarif'}}
       # Run the Python script
       run: |
-        python3 ${{github.action_path}}/SeekerResultsToSarif.py --log_level=${{inputs.log_level}} --outputFile=${{inputs.outputfile}} --url=${{env.SEEKER_SERVER_URL}} --token=${{env.SEEKER_ACCESS_TOKEN}} --project=${{env.SEEKER_PROJECT_KEY}} --version=${{inputs.version}} --codeLocationTypeKeys=${{inputs.codeLocationTypeKeys}} --minSeverity=${{inputs.minSeverity}} --onlySeekerVerified=${{inputs.onlySeekerVerified}} --stacktrace=${{inputs.stacktrace}} --customTagNames=${{inputs.customTagNames}}
+        python3 ${{github.action_path}}/SeekerResultsToSarif.py --log_level=${{inputs.log_level}} --outputFile=${{inputs.outputfile}} --url=${{inputs.url}} --token=${{inputs.token}} --project=${{inputs.project}} --version=${{inputs.version}} --codeLocationTypeKeys=${{inputs.codeLocationTypeKeys}} --minSeverity=${{inputs.minSeverity}} --onlySeekerVerified=${{inputs.onlySeekerVerified}} --stacktrace=${{inputs.stacktrace}} --customTagNames=${{inputs.customTagNames}}
       shell: bash
     - if: ${{inputs.format == 'pdf'}}
       run: |
         "curl -s -o ${{inputs.outputfile}} -X 'GET' \
-        '${{env.SEEKER_SERVER_URL}}/rest/api/latest/reports/export?language=en&sortField=severity&sortDir=DESC&projectKeys=${{env.SEEKER_PROJECT_KEY}}&projectVersions=${{inputs.version}}&minSeverity=${{inputs.minSeverity}}&onlySeekerVerified=${{inputs.onlySeekerVerified}}' \
+        '${{inputs.url}}/rest/api/latest/reports/export?language=en&sortField=severity&sortDir=DESC&projectKeys=${{inputs.project}}&projectVersions=${{inputs.version}}&minSeverity=${{inputs.minSeverity}}&onlySeekerVerified=${{inputs.onlySeekerVerified}}' \
         -H 'accept: application/pdf' \
-        -H 'Authorization: ${{env.SEEKER_ACCESS_TOKEN}}" 
+        -H 'Authorization: ${{inputs.token}}" 
       shell: bash
