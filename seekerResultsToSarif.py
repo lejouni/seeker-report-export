@@ -157,6 +157,8 @@ def writeToFile(findingsInSarif):
     f.write(json.dumps(findingsInSarif, indent=3))
     f.close()
 
+def str2bool(v):
+  return v.lower() in ("yes", "true", "t", "1")
 
 if __name__ == '__main__':
     try:
@@ -175,8 +177,8 @@ if __name__ == '__main__':
         parser.add_argument('--log_level', help="Will print more info... default=INFO", default="INFO")
         parser.add_argument('--codeLocationTypeKeys', help="Options are: CUSTOMER_CODE_DIRECT_CALLS, CUSTOMER_CODE_NESTED_CALLS and THIRD_PARTY_CODE.", required=False)
         parser.add_argument('--minSeverity', help="Options are: INFORMATIVE, LOW, MEDIUM, HIGH, CRITICAL", required=False)
-        parser.add_argument('--onlySeekerVerified', help="Options are: true or false", required=False)
-        parser.add_argument('--stacktrace', help="Options are: true or false", required=False, default=False)
+        parser.add_argument('--onlySeekerVerified', help="Options are: true or false", required=False, type=str2bool)
+        parser.add_argument('--stacktrace', help="Options are: true or false", required=False, default=False, type=str2bool)
         parser.add_argument('--customTagNames', help="Comma separated list of tag names", required=False)
 
         args = parser.parse_args()
