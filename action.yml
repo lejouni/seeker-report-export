@@ -42,7 +42,10 @@ inputs:
     description: Filename with path where it will be created, example /tmp/SeekerResults.sarif.json
     default: ${{github.workspace}}/SeekerResults.sarif.json
     required: false
-
+  format:
+    description: Select which format output will be. Options are sarif and pdf
+    required: true
+        
 runs:
   using: composite
   steps:
