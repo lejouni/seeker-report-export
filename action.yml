@@ -45,11 +45,13 @@ inputs:
 
 runs:
   using: composite
-  env:
-    SEEKER_SERVER_URL: ${{ github.event.inputs.url || env.SEEKER_SERVER_URL }}
-    SEEKER_ACCESS_TOKEN: ${{ github.event.inputs.token || env.SEEKER_ACCESS_TOKEN }}
-    SEEKER_PROJECT_KEY: ${{ github.event.inputs.project || env.SEEKER_PROJECT_KEY }}
   steps:
+    - name: Set environment variables
+      run: |
+        echo "SEEKER_SERVER_URL=${{ github.event.inputs.url || env.SEEKER_SERVER_URL }}" >> $GITHUB_ENV
+        echo "SEEKER_ACCESS_TOKEN=${{ github.event.inputs.token || env.SEEKER_ACCESS_TOKEN }}" >> $GITHUB_ENV
+        echo "SEEKER_PROJECT_KEY=${{ github.event.inputs.project || env.SEEKER_PROJECT_KEY }}" >> $GITHUB_ENV
+      shell: bash
     - if: ${{inputs.format == 'sarif'}}
       # Run the Python script
       run: |
