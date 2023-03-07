@@ -22,7 +22,7 @@ inputs:
     description: Seeker project version, which vulnerability report will be exported.
     required: false
   codeLocationTypeKeys:
-    description: Options are CUSTOMER_CODE_DIRECT_CALLS, CUSTOMER_CODE_NESTED_CALLS and THIRD_PARTY_CODE. All are returned by default. (Works only for Sarif -format output)
+    description: Options are CUSTOMER_CODE_DIRECT_CALLS, CUSTOMER_CODE_NESTED_CALLS and THIRD_PARTY_CODE. All are returned by default.
     required: false
   minSeverity:
     description: Options are INFORMATIVE, LOW, MEDIUM, HIGH, CRITICAL. All are returned by default.
@@ -57,7 +57,7 @@ runs:
     - if: ${{inputs.format == 'pdf'}}
       run: |
         curl -s -o ${{inputs.outputfile}} -X 'GET' \
-        '${{inputs.url}}/rest/api/latest/reports/export?language=en&sortField=severity&sortDir=DESC&projectKeys=${{inputs.project}}&projectVersions=${{inputs.version}}&minSeverity=${{inputs.minSeverity}}&onlySeekerVerified=${{inputs.onlySeekerVerified}}' \
+        '${{inputs.url}}/rest/api/latest/reports/export?language=en&sortField=severity&sortDir=DESC&projectKeys=${{inputs.project}}&projectVersions=${{inputs.version}}&minSeverity=${{inputs.minSeverity}}&onlySeekerVerified=${{inputs.onlySeekerVerified}}&codeLocationTypeKeys=${{inputs.codeLocationTypeKeys}}' \
         -H 'accept: application/pdf' \
         -H 'Authorization: ${{inputs.token}}' 
       shell: bash

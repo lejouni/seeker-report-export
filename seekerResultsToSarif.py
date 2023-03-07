@@ -7,14 +7,16 @@ from timeit import default_timer as timer
 import requests
 from operator import itemgetter
 import urllib.parse
+import traceback
 
 __author__ = "Jouni Lehto"
 __versionro__="0.1.0"
 
 #Global variables
-args = "" 
+args = None 
 
 def getHeader():
+    global args
     return {
             'Authorization': args.token, 
             'Accept': 'text/plain',
@@ -22,6 +24,7 @@ def getHeader():
         }
 
 def getVulnerabilities():
+    global args
     parameters = {'format': 'JSON', 'language': 'en', 'projectKeys': args.project, 'includeStacktrace': args.stacktrace,
                     'includeHttpHeaders': False, 'includeHttpParams': False, 'includeDescription': True, 
                     'includeRemediation': True, 'includeSummary': True, 'includeVerificationProof': False,
@@ -38,44 +41,44 @@ def getVulnerabilities():
     if response.status_code == 200:
         for vulnerability in response.json():
             rule, result = {}, {}
-            rulesId = vulnerability['ItemKey']
+            rulesId = getValue(vulnerability, 'ItemKey')
             ## Adding vulnerabilities as a rule
             if not rulesId in ruleIds:
-                fullDescription = f'{vulnerability["Description"][:1000] if vulnerability["Description"] else "-"}'
-                rule = {"id":rulesId, "name": vulnerability["VulnerabilityName"], "helpUri": vulnerability['SeekerServerLink'], "shortDescription":{"text":f'{vulnerability["Summary"]}'}, 
+                fullDescription = getValue(vulnerability, "Description")[:1000]
+                rule = {"id":rulesId, "name": getValue(vulnerability, "VulnerabilityName"), "helpUri": getValue(vulnerability, 'SeekerServerLink'), "shortDescription":{"text":f'{getValue(vulnerability, "Summary")}'}, 
                     "fullDescription":{"text": fullDescription, "markdown": fullDescription},
                     "help":{"text":fullDescription, "markdown":fullDescription},
-                    "properties": {"security-severity": nativeSeverityToNumber(vulnerability["Severity"].lower()), "tags": ["security"]},
-                    "defaultConfiguration": {"level" : nativeSeverityToLevel(vulnerability["Severity"].lower())}}
+                    "properties": {"security-severity": nativeSeverityToNumber(getValue(vulnerability, "Severity").lower()), "tags": getTags(vulnerability)},
+                    "defaultConfiguration": {"level" : nativeSeverityToLevel(getValue(vulnerability, "Severity").lower())}}
                 rules.append(rule)
                 ruleIds.append(rulesId)
             #Create a new result
             result = {}
             fullDescription = ""
-            if "Description" in vulnerability: fullDescription += f'Description: {vulnerability["Description"]}\n\n'
-            if "Remediation" in vulnerability: fullDescription += f'Remediation Advice: {vulnerability["Remediation"]}\n\n'
-            if "CWE-SANS" in vulnerability: fullDescription += f'{ ",".join(parseCWEs(vulnerability["CWE-SANS"]))}\n\n'
-            if vulnerability['SourceType'] == "CVE": fullDescription += vulnerability['SourceName'] + "\n"
+            fullDescription += f'Description: {getValue(vulnerability, "Description")}\n\n'
+            fullDescription += f'Remediation Advice: {getValue(vulnerability, "Remediation")}\n\n'
+            fullDescription += f'{ ",".join(parseCWEs(getValue(vulnerability, "CWE-SANS")))}\n\n'
+            if getValue(vulnerability, 'SourceType') == "CVE": fullDescription += getValue(vulnerability, 'SourceName') + "\n"
             result['message'] = {"text": f'{fullDescription if not fullDescription == "" else "N/A"}'}
             result['ruleId'] = rulesId
             #If CodeLocation has linenumber then it is used otherwise linenumber is 1
             lineNumber = 1
             artifactLocation = ""
-            if vulnerability['CodeLocation']:
-                locationAndLinenumber = vulnerability['CodeLocation'].split(":")
+            if getValue(vulnerability, 'CodeLocation'):
+                locationAndLinenumber = getValue(vulnerability, 'CodeLocation').split(":")
                 if len(locationAndLinenumber) > 1:
                     lineNumber = int(locationAndLinenumber[1])
                 artifactLocation = locationAndLinenumber[0]
-            elif vulnerability['LastDetectionURL']:
-                artifactLocation = vulnerability['LastDetectionURL']
+            elif getValue(vulnerability, 'LastDetectionURL'):
+                artifactLocation = getValue(vulnerability, 'LastDetectionURL')
 
             result['locations'] = [{"physicalLocation":{"artifactLocation":{"uri": artifactLocation},"region":{"startLine":int(lineNumber)}}}]
-            result['partialFingerprints'] = {"primaryLocationLineHash": vulnerability["SeekerServerLink"].split("/")[-1]}
+            result['partialFingerprints'] = {"primaryLocationLineHash": getValue(vulnerability, "SeekerServerLink").split("/")[-1]}
             #Adding analysis steps to result if stacktrace is true
             if args.stacktrace:
                 locations = []
-                if vulnerability['StackTrace']:
-                    for event in sorted(parseStacktrace(vulnerability['StackTrace']), key=lambda x: x['event-number']):
+                if getValue(vulnerability, 'StackTrace'):
+                    for event in sorted(parseStacktrace(getValue(vulnerability, 'StackTrace')), key=lambda x: x['event-number']):
                         locations.append({"location":{"physicalLocation":{"artifactLocation":{"uri":event["path"]},
                             "region":{"startLine": int(event['linenumber']), "endLine": int(event['linenumber'])}}, 
                             "message" : {"text": f'Event step {event["event-number"]}: {event["message"]}'}}})
@@ -93,6 +96,19 @@ def getVulnerabilities():
         return results, rules
     else:
         logging.error("Seeker response code: " + response.status_code)
+
+def getTags(dict):
+    tags = ["security"]
+    verification_tag = getValue(dict, "VerificationTag")
+    custon_tags = getValue(dict, "CustomTags")
+    if verification_tag and not verification_tag == "Untagged":
+        tags.append(verification_tag)
+    if custon_tags:
+        tags.extend(custon_tags.split(";"))
+    return tags
+
+def getValue(dict, key):
+    return f'{dict[key] if key in dict and dict[key] else ""}'
 
 def nativeSeverityToLevel(argument): 
     switcher = { 
@@ -150,6 +166,7 @@ def getSarifJsonHeader():
     return {"$schema":"https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json","version":"2.1.0"}
 
 def getSarifJsonFooter(toolDriverName, rules):
+    global args
     return {"driver":{"name":toolDriverName,"informationUri": f'{args.url if args.url else ""}',"version":__versionro__,"organization":"Synopsys","rules":rules}}
 
 def writeToFile(findingsInSarif):
@@ -160,8 +177,9 @@ def writeToFile(findingsInSarif):
 def str2bool(v):
   return v.lower() in ("yes", "true", "t", "1")
 
-if __name__ == '__main__':
+def main():
     try:
+        global args
         start = timer()
         #Initialize the parser
         parser = argparse.ArgumentParser(
@@ -206,4 +224,7 @@ if __name__ == '__main__':
         logging.info("Done")
     except Exception as e:
         logging.exception(e)
-        raise SystemError(e)
+        traceback.print_exc()
+    
+if __name__ == '__main__':
+    sys.exit(main())
