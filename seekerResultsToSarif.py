@@ -33,7 +33,9 @@ def getVulnerabilities():
     if args.minSeverity: parameters['minSeverity'] = args.minSeverity.upper()
     if args.onlySeekerVerified: parameters['onlySeekerVerified'] = args.onlySeekerVerified
     if args.customTagNames: parameters['codeLocationTypeKeys'] = args.customTagNames
-
+    if args.version: parameters['projectVersions'] = args.version
+    if args.statuses: parameters['statuses'] = args.statuses    
+    
     endpoint = "/rest/api/latest/vulnerabilities" + get_parameter_string(parameters)
     logging.debug(endpoint)
     response = requests.get(args.url+endpoint, headers=getHeader())
@@ -93,6 +95,9 @@ def getVulnerabilities():
         return results, rules
     elif response.status_code == 400:
         logging.info("No vulnerabilities found!")
+        return results, rules
+    elif response.status_code == 404:
+        logging.info("Project keys or version names not found.")
         return results, rules
     else:
         logging.error("Seeker response code: " + response.status_code)
@@ -189,15 +194,16 @@ def main():
         parser.add_argument('--url', help="Baseurl for Seeker server", required=True)
         parser.add_argument('--token', help="Seeker Access token", required=True)
         parser.add_argument('--project', help="Seeker project name", required=True)
-        parser.add_argument('--version', help="Seeker project version name", required=True)
+        parser.add_argument('--version', help="Seeker project version name", required=False)
         parser.add_argument('--outputFile', help="Filename with path where it will be created, example: /tmp/seekerFindings.sarif.json \
                                                 if outputfile is not given, then json is printed stdout.", required=False)
         parser.add_argument('--log_level', help="Will print more info... default=INFO", default="INFO")
         parser.add_argument('--codeLocationTypeKeys', help="Options are: CUSTOMER_CODE_DIRECT_CALLS, CUSTOMER_CODE_NESTED_CALLS and THIRD_PARTY_CODE.", required=False)
         parser.add_argument('--minSeverity', help="Options are: INFORMATIVE, LOW, MEDIUM, HIGH, CRITICAL", required=False)
-        parser.add_argument('--onlySeekerVerified', help="Options are: true or false", required=False, type=str2bool)
+        parser.add_argument('--onlySeekerVerified', help="Options are: true or false", required=False, default=False, type=str2bool)
         parser.add_argument('--stacktrace', help="Options are: true or false", required=False, default=False, type=str2bool)
         parser.add_argument('--customTagNames', help="Comma separated list of tag names", required=False)
+        parser.add_argument('--statuses', help='Comma-separated list of vulnerability status keys to be included', default='Detected,Reviewed', required=False)
 
         args = parser.parse_args()
         #Initializing the logger

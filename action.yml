@@ -11,13 +11,13 @@ inputs:
     required: false
   url:
     description: Seeker server URL.
-    required: false
+    required: true
   token:
     description: Seeker Access token to be used.
-    required: false
+    required: true
   project:
     description: Seeker project, which vulnerability report will be exported.
-    required: false
+    required: true
   version:
     description: Seeker project version, which vulnerability report will be exported.
     required: false
@@ -45,6 +45,11 @@ inputs:
   format:
     description: Select which format output will be. Options are sarif and pdf
     required: true
+    default: sarif
+  statuses:
+    description: Comma-separated list of vulnerability status keys to be included.
+    required: false
+    default: Detected,Reviewed
         
 runs:
   using: composite
@@ -52,7 +57,7 @@ runs:
     - if: ${{inputs.format == 'sarif'}}
       # Run the Python script
       run: |
-        python3 ${{github.action_path}}/seekerResultsToSarif.py --log_level="${{inputs.log_level}}" --outputFile="${{inputs.outputfile}}" --url="${{inputs.url}}" --token="${{inputs.token}}" --project="${{inputs.project}}" --version="${{inputs.version}}" --codeLocationTypeKeys="${{inputs.codeLocationTypeKeys}}" --minSeverity="${{inputs.minSeverity}}" --onlySeekerVerified="${{inputs.onlySeekerVerified}}" --stacktrace="${{inputs.stacktrace}}" --customTagNames="${{inputs.customTagNames}}"
+        python3 ${{github.action_path}}/seekerResultsToSarif.py --statuses="${{inputs.statuses}}" --log_level="${{inputs.log_level}}" --outputFile="${{inputs.outputfile}}" --url="${{inputs.url}}" --token="${{inputs.token}}" --project="${{inputs.project}}" --version="${{inputs.version}}" --codeLocationTypeKeys="${{inputs.codeLocationTypeKeys}}" --minSeverity="${{inputs.minSeverity}}" --onlySeekerVerified="${{inputs.onlySeekerVerified}}" --stacktrace="${{inputs.stacktrace}}" --customTagNames="${{inputs.customTagNames}}"
       shell: bash
     - if: ${{inputs.format == 'pdf'}}
       run: |
