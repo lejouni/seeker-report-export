@@ -12,7 +12,7 @@ This Github Action expects that you have run the Seeker analysis and you have ac
 | token | Seeker Access token to be used. | - | true | X | X |
 | project | Seeker project, which vulnerability report will be exported. | - | true | X | X |
 | version | Seeker project version, which vulnerability report will be exported. | - | false | X | X |
-| codeLocationTypeKeys | Options are CUSTOMER_CODE_DIRECT_CALLS, CUSTOMER_CODE_NESTED_CALLS and THIRD_PARTY_CODE. All are returned by default. | All | false | X | X |
+| codeLocationTypeKeys | Comma-separated list of code location type keys to be included in the report. Code location keys include CUSTOMER_CODE_DIRECT_CALLS, CUSTOMER_CODE_NESTED_CALLS and THIRD_PARTY_CODE. All are returned by default. | All | false | X | X |
 | minSeverity | Options are INFORMATIVE, LOW, MEDIUM, HIGH, CRITICAL. All are returned by default. | All | false | X | X |
 | onlySeekerVerified | Options are true or false. Will return only Seeker Verfied vulnerabilites. | false | false | X | X |
 | stacktrace | Options are true or false. If this is set to true, then possible stacktrace is added into the results.  (Works only for Sarif -format output) | false | false | X |  |

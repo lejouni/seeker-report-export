@@ -198,7 +198,7 @@ def main():
         parser.add_argument('--outputFile', help="Filename with path where it will be created, example: /tmp/seekerFindings.sarif.json \
                                                 if outputfile is not given, then json is printed stdout.", required=False)
         parser.add_argument('--log_level', help="Will print more info... default=INFO", default="INFO")
-        parser.add_argument('--codeLocationTypeKeys', help="Options are: CUSTOMER_CODE_DIRECT_CALLS, CUSTOMER_CODE_NESTED_CALLS and THIRD_PARTY_CODE.", required=False)
+        parser.add_argument('--codeLocationTypeKeys', help="Comma-separated list of code location type keys to be included in the report. Code location keys include CUSTOMER_CODE_DIRECT_CALLS, CUSTOMER_CODE_NESTED_CALLS and THIRD_PARTY_CODE.", required=False)
         parser.add_argument('--minSeverity', help="Options are: INFORMATIVE, LOW, MEDIUM, HIGH, CRITICAL", required=False)
         parser.add_argument('--onlySeekerVerified', help="Options are: true or false", required=False, default=False, type=str2bool)
         parser.add_argument('--stacktrace', help="Options are: true or false", required=False, default=False, type=str2bool)

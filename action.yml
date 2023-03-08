@@ -22,7 +22,7 @@ inputs:
     description: Seeker project version, which vulnerability report will be exported.
     required: false
   codeLocationTypeKeys:
-    description: Options are CUSTOMER_CODE_DIRECT_CALLS, CUSTOMER_CODE_NESTED_CALLS and THIRD_PARTY_CODE. All are returned by default.
+    description: Comma-separated list of code location type keys to be included in the report. Code location keys include CUSTOMER_CODE_DIRECT_CALLS, CUSTOMER_CODE_NESTED_CALLS and THIRD_PARTY_CODE. All are returned by default.
     required: false
   minSeverity:
     description: Options are INFORMATIVE, LOW, MEDIUM, HIGH, CRITICAL. All are returned by default.
