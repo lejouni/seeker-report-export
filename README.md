@@ -5,8 +5,8 @@ This Action will export Seeker vulnerabilities in Sarif or Pdf -format.
 This Github Action expects that you have run the Seeker analysis and you have access to Seeker server.
 
 ## Available Options
-| Option name | Description | Default value | Required | Available for Sarif | Available for pdf
-|----------|----------|---------|----------|----------|----------|
+| Option name | Description | Default value | Required | For Sarif | For pdf
+|----------|----------|---------|-------|----------|----------|
 | log_level | Logging level | DEBUG | false | X | X |
 | url | Seeker server URL. | - | true | X | X |
 | token | Seeker Access token to be used. | - | true | X | X |
