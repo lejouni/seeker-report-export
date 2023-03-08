@@ -47,7 +47,7 @@ def getVulnerabilities():
             ## Adding vulnerabilities as a rule
             if not rulesId in ruleIds:
                 fullDescription = getValue(vulnerability, "Description")[:1000]
-                rule = {"id":rulesId, "name": getValue(vulnerability, "VulnerabilityName"), "helpUri": getValue(vulnerability, 'SeekerServerLink'), "shortDescription":{"text":f'{getValue(vulnerability, "Summary")[:1000]}'}, 
+                rule = {"id":rulesId, "name": getValue(vulnerability, "VulnerabilityName"), "helpUri": getValue(vulnerability, 'SeekerServerLink'), "shortDescription":{"text":f'{getValue(vulnerability, "VulnerabilityName")[:1000]}'}, 
                     "fullDescription":{"text": fullDescription, "markdown": fullDescription},
                     "help":{"text":fullDescription, "markdown":fullDescription},
                     "properties": {"security-severity": nativeSeverityToNumber(getValue(vulnerability, "Severity").lower()), "tags": getTags(vulnerability)},
