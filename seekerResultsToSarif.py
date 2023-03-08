@@ -47,7 +47,7 @@ def getVulnerabilities():
             ## Adding vulnerabilities as a rule
             if not rulesId in ruleIds:
                 fullDescription = getValue(vulnerability, "Description")[:1000]
-                rule = {"id":rulesId, "name": getValue(vulnerability, "VulnerabilityName"), "helpUri": getValue(vulnerability, 'SeekerServerLink'), "shortDescription":{"text":f'{getValue(vulnerability, "Summary")}'}, 
+                rule = {"id":rulesId, "name": getValue(vulnerability, "VulnerabilityName"), "helpUri": getValue(vulnerability, 'SeekerServerLink'), "shortDescription":{"text":f'{getValue(vulnerability, "Summary")[:1000]}'}, 
                     "fullDescription":{"text": fullDescription, "markdown": fullDescription},
                     "help":{"text":fullDescription, "markdown":fullDescription},
                     "properties": {"security-severity": nativeSeverityToNumber(getValue(vulnerability, "Severity").lower()), "tags": getTags(vulnerability)},
@@ -61,7 +61,7 @@ def getVulnerabilities():
             fullDescription += f'Remediation Advice: {getValue(vulnerability, "Remediation")}\n\n'
             fullDescription += f'{ ",".join(parseCWEs(getValue(vulnerability, "CWE-SANS")))}\n\n'
             if getValue(vulnerability, 'SourceType') == "CVE": fullDescription += getValue(vulnerability, 'SourceName') + "\n"
-            result['message'] = {"text": f'{fullDescription if not fullDescription == "" else "N/A"}'}
+            result['message'] = {"text": f'{fullDescription[:1000] if not fullDescription == "" else "N/A"}'}
             result['ruleId'] = rulesId
             #If CodeLocation has linenumber then it is used otherwise linenumber is 1
             lineNumber = 1
@@ -71,6 +71,8 @@ def getVulnerabilities():
                 if len(locationAndLinenumber) > 1:
                     lineNumber = int(locationAndLinenumber[1])
                 artifactLocation = locationAndLinenumber[0]
+                if getValue(vulnerability, "CheckerKey") == "SCA-VULNERABLE-COMPONENT":
+                    artifactLocation = "file:///" + artifactLocation
             elif getValue(vulnerability, 'LastDetectionURL'):
                 artifactLocation = getValue(vulnerability, 'LastDetectionURL')
 
