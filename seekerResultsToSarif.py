@@ -57,7 +57,7 @@ def getVulnerabilities():
             #Create a new result
             result = {}
             fullDescription = ""
-            fullDescription += f'Description: {getValue(vulnerability, "Description")}\n\n'
+            fullDescription += f'{getValue(vulnerability, "Summary")}\n\n'
             fullDescription += f'Remediation Advice: {getValue(vulnerability, "Remediation")}\n\n'
             fullDescription += f'{ ",".join(parseCWEs(getValue(vulnerability, "CWE-SANS")))}\n\n'
             if getValue(vulnerability, 'SourceType') == "CVE": fullDescription += getValue(vulnerability, 'SourceName') + "\n"
