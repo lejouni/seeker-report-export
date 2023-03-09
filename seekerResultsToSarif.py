@@ -70,7 +70,7 @@ def getVulnerabilities():
                 locationAndLinenumber = getValue(vulnerability, 'CodeLocation').split(":")
                 if len(locationAndLinenumber) > 1:
                     lineNumber = int(locationAndLinenumber[1])
-                artifactLocation = locationAndLinenumber[0]
+                artifactLocation = locationAndLinenumber[0].replace(".","/")
                 if getValue(vulnerability, "CheckerKey") == "SCA-VULNERABLE-COMPONENT":
                     artifactLocation = artifactLocation.replace(" ", "_")
             elif getValue(vulnerability, 'LastDetectionURL'):
