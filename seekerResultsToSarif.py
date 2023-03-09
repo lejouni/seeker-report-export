@@ -75,10 +75,10 @@ def getVulnerabilities():
                     artifactLocation = artifactLocation.replace(" ", "_")
             elif getValue(vulnerability, 'LastDetectionURL'):
                 artifactLocation = getValue(vulnerability, 'LastDetectionURL')
-                if artifactLocation.startswith('/'):
-                    artifactLocation = artifactLocation[1::]
             if not artifactLocation:
                 artifactLocation = getValue(vulnerability, "CheckerKey")
+            if artifactLocation.startswith('/'):
+                artifactLocation = artifactLocation[1::]
 
             result['locations'] = [{"physicalLocation":{"artifactLocation":{"uri": artifactLocation},"region":{"startLine":int(lineNumber)}}, "message": {"text": getValue(vulnerability, 'SeekerServerLink')}}]
             result['partialFingerprints'] = {"primaryLocationLineHash": getValue(vulnerability, "SeekerServerLink").split("/")[-1]}
