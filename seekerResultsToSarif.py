@@ -70,9 +70,7 @@ def getVulnerabilities():
                 locationAndLinenumber = getValue(vulnerability, 'CodeLocation').split(":")
                 if len(locationAndLinenumber) > 1:
                     lineNumber = int(locationAndLinenumber[1])
-                artifactLocation = locationAndLinenumber[0].replace(".","/")
-                if getValue(vulnerability, "CheckerKey") == "SCA-VULNERABLE-COMPONENT":
-                    artifactLocation = artifactLocation.replace(" ", "_")
+                artifactLocation = locationAndLinenumber[0]
             elif getValue(vulnerability, 'LastDetectionURL'):
                 artifactLocation = getValue(vulnerability, 'LastDetectionURL')
             if not artifactLocation:
@@ -80,7 +78,7 @@ def getVulnerabilities():
             if artifactLocation.startswith('/'):
                 artifactLocation = artifactLocation[1::]
 
-            result['locations'] = [{"physicalLocation":{"artifactLocation":{"uri": artifactLocation},"region":{"startLine":int(lineNumber)}}, "message": {"text": getValue(vulnerability, 'SeekerServerLink')}}]
+            result['locations'] = [{"physicalLocation":{"artifactLocation":{"uri": artifactLocation.replace(" ", "_")},"region":{"startLine":int(lineNumber)}}, "message": {"text": getValue(vulnerability, 'SeekerServerLink')}}]
             result['partialFingerprints'] = {"primaryLocationLineHash": getValue(vulnerability, "SeekerServerLink").split("/")[-1]}
             #Adding analysis steps to result if stacktrace is true
             if args.stacktrace:
