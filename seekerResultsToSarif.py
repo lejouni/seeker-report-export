@@ -41,6 +41,9 @@ def getVulnerabilities():
     response = requests.get(args.url+endpoint, headers=getHeader())
     rules, results, ruleIds = [], [], []
     if response.status_code == 200:
+        f = open("seekerResults.json", "w")
+        f.write(json.dumps(response.json(), indent=3))
+        f.close()
         for vulnerability in response.json():
             rule, result = {}, {}
             rulesId = getValue(vulnerability, 'ItemKey')
@@ -56,7 +59,7 @@ def getVulnerabilities():
                 ruleIds.append(rulesId)
             #Create a new result
             result = {}
-            fullDescription = ""
+            fullDescription = f'[See in Seeker]({getValue(vulnerability, "SeekerServerLink")})\n'
             fullDescription += f'{getValue(vulnerability, "Summary")}\n\n'
             fullDescription += f'Remediation Advice: {getValue(vulnerability, "Remediation")}\n\n'
             fullDescription += f'{ ",".join(parseCWEs(getValue(vulnerability, "CWE-SANS")))}\n\n'
@@ -73,10 +76,10 @@ def getVulnerabilities():
                 artifactLocation = locationAndLinenumber[0]
             elif getValue(vulnerability, 'LastDetectionURL'):
                 artifactLocation = getValue(vulnerability, 'LastDetectionURL')
-            if not artifactLocation:
-                artifactLocation = getValue(vulnerability, "CheckerKey")
             if artifactLocation.startswith('/'):
                 artifactLocation = artifactLocation[1::]
+            if not artifactLocation:
+                artifactLocation = getValue(vulnerability, "CheckerKey")
 
             result['locations'] = [{"physicalLocation":{"artifactLocation":{"uri": artifactLocation.replace(" ", "_")},"region":{"startLine":int(lineNumber)}}, "message": {"text": getValue(vulnerability, 'SeekerServerLink')}}]
             result['partialFingerprints'] = {"primaryLocationLineHash": getValue(vulnerability, "SeekerServerLink").split("/")[-1]}
