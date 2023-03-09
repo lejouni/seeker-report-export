@@ -47,7 +47,7 @@ def getVulnerabilities():
             ## Adding vulnerabilities as a rule
             if not rulesId in ruleIds:
                 fullDescription = getValue(vulnerability, "Description")[:1000]
-                rule = {"id":rulesId, "name": getValue(vulnerability, "VulnerabilityName"), "helpUri": getValue(vulnerability, 'SeekerServerLink'), "shortDescription":{"text":f'{getValue(vulnerability, "VulnerabilityName")[:1000]}'}, 
+                rule = {"id":rulesId, "name": getValue(vulnerability, "VulnerabilityName"), "shortDescription":{"text":f'{getValue(vulnerability, "VulnerabilityName")[:1000]}'}, 
                     "fullDescription":{"text": fullDescription, "markdown": fullDescription},
                     "help":{"text":fullDescription, "markdown":fullDescription},
                     "properties": {"security-severity": nativeSeverityToNumber(getValue(vulnerability, "Severity").lower()), "tags": getTags(vulnerability)},
@@ -72,13 +72,15 @@ def getVulnerabilities():
                     lineNumber = int(locationAndLinenumber[1])
                 artifactLocation = locationAndLinenumber[0]
                 if getValue(vulnerability, "CheckerKey") == "SCA-VULNERABLE-COMPONENT":
-                    artifactLocation = "file:///" + artifactLocation
+                    artifactLocation = "file:///" + artifactLocation.replace(" ", "_")
             elif getValue(vulnerability, 'LastDetectionURL'):
                 artifactLocation = getValue(vulnerability, 'LastDetectionURL')
                 if artifactLocation.startswith('/'):
                     artifactLocation = artifactLocation[1::]
+            if not artifactLocation:
+                artifactLocation = getValue(vulnerability, "CheckerKey")
 
-            result['locations'] = [{"physicalLocation":{"artifactLocation":{"uri": artifactLocation},"region":{"startLine":int(lineNumber)}}}]
+            result['locations'] = [{"physicalLocation":{"artifactLocation":{"uri": artifactLocation},"region":{"startLine":int(lineNumber)}}, "message": {"text": getValue(vulnerability, 'SeekerServerLink')}}]
             result['partialFingerprints'] = {"primaryLocationLineHash": getValue(vulnerability, "SeekerServerLink").split("/")[-1]}
             #Adding analysis steps to result if stacktrace is true
             if args.stacktrace:
@@ -158,7 +160,8 @@ def parseStacktrace(stacktrace):
                 sub_event['message'] = sourceCodeFile[0:sourceCodeFile.index('(')]
                 sourceWithLinenumber = sourceCodeFile[sourceCodeFile.index('(')+1:sourceCodeFile.index(')')].split(':')
                 if sourceWithLinenumber:
-                    sub_event['path'] = sourceWithLinenumber[0]
+                    sub_event['path'] = sourceWithLinenumber[0].replace(" ", "_")
+                    # print(sourceWithLinenumber[0])
                     if len(sourceWithLinenumber) > 1:
                         sub_event['linenumber'] = sourceWithLinenumber[1]
                     else:
