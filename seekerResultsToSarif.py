@@ -72,7 +72,7 @@ def getVulnerabilities():
                     lineNumber = int(locationAndLinenumber[1])
                 artifactLocation = locationAndLinenumber[0]
                 if getValue(vulnerability, "CheckerKey") == "SCA-VULNERABLE-COMPONENT":
-                    artifactLocation = "file:///" + artifactLocation.replace(" ", "_")
+                    artifactLocation = artifactLocation.replace(" ", "_")
             elif getValue(vulnerability, 'LastDetectionURL'):
                 artifactLocation = getValue(vulnerability, 'LastDetectionURL')
                 if artifactLocation.startswith('/'):
