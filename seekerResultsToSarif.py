@@ -8,6 +8,7 @@ import requests
 from operator import itemgetter
 import urllib.parse
 import traceback
+import hashlib
 
 __author__ = "Jouni Lehto"
 __versionro__="0.1.0"
@@ -82,7 +83,7 @@ def getVulnerabilities():
                 artifactLocation = getValue(vulnerability, "CheckerKey")
 
             result['locations'] = [{"physicalLocation":{"artifactLocation":{"uri": artifactLocation.replace(" ", "_")},"region":{"startLine":int(lineNumber)}}, "message": {"text": getValue(vulnerability, 'SeekerServerLink')}}]
-            result['partialFingerprints'] = {"primaryLocationLineHash": getValue(vulnerability, "SeekerServerLink").split("/")[-1]}
+            result['partialFingerprints'] = {"primaryLocationLineHash": hashlib.sha256((f'{getValue(vulnerability, "SeekerServerLink").split("/")[-1]}').encode(encoding='UTF-8')).hexdigest()}
             #Adding analysis steps to result if stacktrace is true
             if args.stacktrace:
                 locations = []
