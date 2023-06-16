@@ -114,8 +114,9 @@ def getVulnerabilities():
 def getHelpMarkdown(vulnerability):
     messageText = ""
     #Common info
-    messageText += f'## {getValue(vulnerability, "ItemKey")} - {getValue(vulnerability,"VulnerabilityName")}'
-    messageText += f'\n\n|       |         |'
+    vulnerability_name = getValue(vulnerability, "ItemKey") + " - " + getValue(vulnerability,"VulnerabilityName")
+    messageText += f'## {vulnerability_name}'
+    messageText += f'\n|       |         |'
     messageText += f'\n| :---- |  :----  |'
     messageText += f'\n| Status: | {getValue(vulnerability, "Status")} |'
     verified = getValue(vulnerability, "VerificationTag")
