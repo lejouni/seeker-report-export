@@ -42,9 +42,6 @@ def getVulnerabilities():
     response = requests.get(args.url+endpoint, headers=getHeader())
     rules, results, ruleIds = [], [], []
     if response.status_code == 200:
-        f = open("seekerResults.json", "w")
-        f.write(json.dumps(response.json(), indent=3))
-        f.close()
         for vulnerability in response.json():
             rule, result = {}, {}
             rulesId = getValue(vulnerability, 'ItemKey')
@@ -61,7 +58,7 @@ def getVulnerabilities():
                 ruleIds.append(rulesId)
             #Create a new result
             result = {}
-            result['message'] = {"text": f'{description[:1000] if not description == "" else "N/A"}'}
+            result['message'] = {"text": f'{description if not description == "" else "N/A"}'}
             result['ruleId'] = rulesId
             #If CodeLocation has linenumber then it is used otherwise linenumber is 1
             lineNumber = 1
@@ -118,7 +115,7 @@ def getHelpMarkdown(vulnerability):
     messageText = ""
     #Common info
     messageText += f'## {getValue(vulnerability, "ItemKey")} - {getValue(vulnerability,"VulnerabilityName")}'
-    messageText += f'\n|       |         |'
+    messageText += f'\n| : {getValue(vulnerability, "ItemKey")} - {getValue(vulnerability,"VulnerabilityName")} : |'
     messageText += f'\n| :---- |  :----  |'
     messageText += f'\n| Status: | {getValue(vulnerability, "Status")} |'
     verified = getValue(vulnerability, "VerificationTag")
