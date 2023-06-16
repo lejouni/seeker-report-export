@@ -114,8 +114,11 @@ def getVulnerabilities():
 def getHelpMarkdown(vulnerability):
     messageText = ""
     #Common info
+    #Description
+    messageText += f'## Description'
+    messageText += f'\n{getValue(vulnerability, "Description")}'
     vulnerability_name = getValue(vulnerability, "ItemKey") + " - " + getValue(vulnerability,"VulnerabilityName")
-    messageText += f'## {vulnerability_name}'
+    messageText += f'\n\n## {vulnerability_name}'
     messageText += f'\n|       |         |'
     messageText += f'\n| :---- |  :----  |'
     messageText += f'\n| Status: | {getValue(vulnerability, "Status")} |'
@@ -165,9 +168,6 @@ def getHelpMarkdown(vulnerability):
     CAPEC = getValue(vulnerability, "CAPEC")
     if CAPEC:
         messageText += f'\n| CAPEC: | {CAPEC} |'
-    #Description
-    messageText += f'\n\n## Description'
-    messageText += f'\n{getValue(vulnerability, "Description")}'
     #Summary
     messageText += f'\n\n## Summary'
     messageText += f'\n{getValue(vulnerability, "Summary")}'
