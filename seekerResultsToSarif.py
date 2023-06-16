@@ -113,12 +113,11 @@ def getVulnerabilities():
 
 def getHelpMarkdown(vulnerability):
     messageText = ""
-    #Common info
     #Description
     messageText += f'## Description'
     messageText += f'\n{getValue(vulnerability, "Description")}'
-    vulnerability_name = getValue(vulnerability, "ItemKey") + " - " + getValue(vulnerability,"VulnerabilityName")
-    messageText += f'\n\n## {vulnerability_name}'
+    #Common info
+    messageText += f'\n\n## {getValue(vulnerability, "ItemKey")} - {getValue(vulnerability,"VulnerabilityName")}'
     messageText += f'\n|       |         |'
     messageText += f'\n| :---- |  :----  |'
     messageText += f'\n| Status: | {getValue(vulnerability, "Status")} |'
@@ -142,7 +141,7 @@ def getHelpMarkdown(vulnerability):
         lastDetectionSourceName = getValue(vulnerability, "LastDetectionSourceName")
         if lastDetectionSourceName:
             messageText += f'\n| {lastDetectionSourceType}: | {lastDetectionSourceName} |'
-    messageText += f'\n| See in Seeker: | [{getValue(vulnerability, "ItemKey")}]({getValue(vulnerability, "SeekerServerLink")}) |'
+    messageText += f'\n| See in Seeker: | [{getValue(vulnerability, "SeekerServerLink")}]({getValue(vulnerability, "SeekerServerLink")}) |'
     #Classification
     messageText += f'\n\n## Classification'
     messageText += f'\n|       |         |'
