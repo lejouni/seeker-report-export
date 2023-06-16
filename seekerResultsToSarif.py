@@ -26,10 +26,10 @@ def getHeader():
 
 def getVulnerabilities():
     global args
-    parameters = {'format': 'JSON', 'language': 'en', 'projectKeys': args.project, 'includeStacktrace': args.stacktrace,
-                    'includeHttpHeaders': False, 'includeHttpParams': False, 'includeDescription': True, 
-                    'includeRemediation': True, 'includeSummary': True, 'includeVerificationProof': False,
-                    'includeTriageEvents': False, 'includeComments': False}
+    parameters = {'format': 'JSON', 'language': 'en', 'projectKeys': args.project, 'includeStacktrace': True,
+                    'includeHttpHeaders': True, 'includeHttpParams': True, 'includeDescription': True, 
+                    'includeRemediation': True, 'includeSummary': True, 'includeVerificationProof': True,
+                    'includeTriageEvents': True, 'includeComments': True}
     if args.codeLocationTypeKeys: parameters['codeLocationTypeKeys'] = args.codeLocationTypeKeys.upper()
     if args.minSeverity: parameters['minSeverity'] = args.minSeverity.upper()
     if args.onlySeekerVerified: parameters['onlySeekerVerified'] = args.onlySeekerVerified
@@ -49,39 +49,44 @@ def getVulnerabilities():
             rule, result = {}, {}
             rulesId = getValue(vulnerability, 'ItemKey')
             ## Adding vulnerabilities as a rule
+            description = getValue(vulnerability, "Description")[:1000]
             if not rulesId in ruleIds:
-                fullDescription = getValue(vulnerability, "Description")[:1000]
+                descriptionMarkdown = getHelpMarkdown(vulnerability)
                 rule = {"id":rulesId, "name": getValue(vulnerability, "VulnerabilityName"), "shortDescription":{"text":f'{getValue(vulnerability, "VulnerabilityName")[:1000]}'}, 
-                    "fullDescription":{"text": fullDescription, "markdown": fullDescription},
-                    "help":{"text":fullDescription, "markdown":fullDescription},
+                    "fullDescription":{"text": description, "markdown": descriptionMarkdown},
+                    "help":{"text":description, "markdown":descriptionMarkdown},
                     "properties": {"security-severity": nativeSeverityToNumber(getValue(vulnerability, "Severity").lower()), "tags": getTags(vulnerability)},
                     "defaultConfiguration": {"level" : nativeSeverityToLevel(getValue(vulnerability, "Severity").lower())}}
                 rules.append(rule)
                 ruleIds.append(rulesId)
             #Create a new result
             result = {}
-            fullDescription = f'[See in Seeker]({getValue(vulnerability, "SeekerServerLink")})\n'
-            fullDescription += f'{getValue(vulnerability, "Summary")}\n\n'
-            fullDescription += f'Remediation Advice: {getValue(vulnerability, "Remediation")}\n\n'
-            fullDescription += f'{ ",".join(parseCWEs(getValue(vulnerability, "CWE-SANS")))}\n\n'
-            if getValue(vulnerability, 'SourceType') == "CVE": fullDescription += getValue(vulnerability, 'SourceName') + "\n"
-            result['message'] = {"text": f'{fullDescription[:1000] if not fullDescription == "" else "N/A"}'}
+            result['message'] = {"text": f'{description[:1000] if not description == "" else "N/A"}'}
             result['ruleId'] = rulesId
             #If CodeLocation has linenumber then it is used otherwise linenumber is 1
             lineNumber = 1
             artifactLocation = ""
-            if getValue(vulnerability, 'CodeLocation'):
-                locationAndLinenumber = getValue(vulnerability, 'CodeLocation').split(":")
+            codeLocation = getValue(vulnerability, 'CodeLocation')
+            if codeLocation:
+                locationAndLinenumber = codeLocation.split(":")
                 if len(locationAndLinenumber) > 1:
                     lineNumber = int(locationAndLinenumber[1])
-                artifactLocation = locationAndLinenumber[0]
-            elif getValue(vulnerability, 'LastDetectionURL'):
+                logging.info(getValue(vulnerability, "SourceType"))
+                if not getValue(vulnerability, "SourceType") == "CVE":
+                    artifactLocation = locationAndLinenumber[0].split("(")[0].replace(".", "/")
+                else:
+                    artifactLocation = locationAndLinenumber[0]
+            if not artifactLocation:
                 artifactLocation = getValue(vulnerability, 'LastDetectionURL')
-            if artifactLocation.startswith('/'):
-                artifactLocation = artifactLocation[1::]
+            if not artifactLocation:
+                lastDetectionCodeLocation = getValue(vulnerability, 'LastDetectionCodeLocation')
+                if lastDetectionCodeLocation:
+                    artifactLocation = lastDetectionCodeLocation.split("(")[0].replace(".", "/")
             if not artifactLocation:
                 artifactLocation = getValue(vulnerability, "CheckerKey")
-
+            if artifactLocation.startswith('/'):
+                artifactLocation = artifactLocation[1::]
+            logging.info(artifactLocation)
             result['locations'] = [{"physicalLocation":{"artifactLocation":{"uri": artifactLocation.replace(" ", "_")},"region":{"startLine":int(lineNumber)}}, "message": {"text": getValue(vulnerability, 'SeekerServerLink')}}]
             result['partialFingerprints'] = {"primaryLocationLineHash": hashlib.sha256((f'{getValue(vulnerability, "SeekerServerLink").split("/")[-1]}').encode(encoding='UTF-8')).hexdigest()}
             #Adding analysis steps to result if stacktrace is true
@@ -110,6 +115,107 @@ def getVulnerabilities():
     else:
         logging.error("Seeker response code: " + response.status_code)
 
+
+def getHelpMarkdown(vulnerability):
+    messageText = ""
+    #Common info
+    messageText += f'## {getValue(vulnerability, "ItemKey")} - {getValue(vulnerability,"VulnerabilityName")}'
+    messageText += f'\n|       |         |'
+    messageText += f'\n| :---- |  :----  |'
+    messageText += f'\n| Status: | {getValue(vulnerability, "Status")} |'
+    verified = getValue(vulnerability, "VerificationTag")
+    if not verified == "Untagged":
+        messageText += f'\n| Verification: | {verified} |'
+    messageText += f'\n| Severity: | {getValue(vulnerability, "Severity")} |'
+    messageText += f'\n| Detections: | {getValue(vulnerability, "DetectionCount")} |'
+    messageText += f'\n| First seen: | {getValue(vulnerability, "FirstDetectionTime")} |'
+    messageText += f'\n| Last seen: | {getValue(vulnerability, "LastDetectionTime")} |'
+    messageText += f'\n| Project: | {getValue(vulnerability, "ProjectKey")} |'
+    url = getValue(vulnerability, "URL")
+    if url:
+        messageText += f'\n| URL: | {url} |'
+
+    codelocation = getValue(vulnerability, "CodeLocation")
+    if codelocation:
+        messageText += f'\n| Code location: | {codelocation} |'
+    lastDetectionSourceType = getValue(vulnerability, "LastDetectionSourceType")
+    if lastDetectionSourceType:
+        lastDetectionSourceName = getValue(vulnerability, "LastDetectionSourceName")
+        if lastDetectionSourceName:
+            messageText += f'\n| {lastDetectionSourceType}: | {lastDetectionSourceName} |'
+    messageText += f'\n| See in Seeker: | []({getValue(vulnerability, "SeekerServerLink")}) |'
+    #Classification
+    messageText += f'\n\n## Classification'
+    messageText += f'\n|       |         |'
+    messageText += f'\n| :---- |  :----  |'
+    OWASP2021 = getValue(vulnerability, "OWASP2021")
+    if OWASP2021:
+        messageText += f'\n| OWASP Top 10 2021: | {OWASP2021} |'
+    OWASP2017 = getValue(vulnerability, "OWASP2017")
+    if OWASP2017:
+        messageText += f'\n| OWASP Top 10 2017: | {OWASP2017} |'
+    OWASP2013 = getValue(vulnerability, "OWASP2013")
+    if OWASP2013:
+        messageText += f'\n| OWASP Top 10 2013: | {OWASP2013} |'
+    PCIDSS = getValue(vulnerability, "PCI-DSS")
+    if PCIDSS:
+        messageText += f'\n| PCI-DSS v3.2.1: | {PCIDSS} |'
+    CWE = getValue(vulnerability, "CWE-SANS")
+    if CWE:
+        messageText += f'\n| CWE: | {CWE} |'
+    GDPR = getValue(vulnerability, "GDPR")
+    if GDPR:
+        messageText += f'\n| GDPR: | {GDPR} |'
+    CAPEC = getValue(vulnerability, "CAPEC")
+    if CAPEC:
+        messageText += f'\n| CAPEC: | {CAPEC} |'
+    #Description
+    messageText += f'\n\n## Description'
+    messageText += f'\n{getValue(vulnerability, "Description")}'
+    #Summary
+    messageText += f'\n\n## Summary'
+    messageText += f'\n{getValue(vulnerability, "Summary")}'
+    #Verification proof
+    messageText += f'\n\n## Verification proof'
+    messageText += f'\n{getValue(vulnerability, "VerificationProof")}'
+    #HTTP context
+    lastDetectionHttpHeaders = getValue(vulnerability, "LastDetectionHttpHeaders")
+    if lastDetectionHttpHeaders:
+        messageText += f'\n\n## HTTP context'
+        messageText += f'\n**HTTP headers**'
+        messageText += f"\n```html"
+        for httpHeader in lastDetectionHttpHeaders:
+            messageText += f"\n{httpHeader}"
+        messageText += f"\n```"
+        lastDetectionHttpParams = getValue(vulnerability, "LastDetectionHttpParams")
+        if lastDetectionHttpParams:
+            messageText += f'\n**HTTP parameters**'
+            messageText += f"\n```html"
+            for httpParam in lastDetectionHttpParams:
+                messageText += f"\n{httpParam}"
+            messageText += f"\n```"
+    #Remediation
+    messageText += f'\n\n## Remediation'
+    messageText += f'\n{getValue(vulnerability, "Remediation")}'
+    #Triage history
+    triageEvents = getValue(vulnerability, "TriageEvents")
+    if triageEvents:
+        messageText += f'\n\n## Triage history'
+        messageText += f'\n*Triage events are ordered from newest to oldest*\n'
+        for event in triageEvents:
+            messageText += f'\n{event}'
+    #Comments
+    comments = getValue(vulnerability, "Comments")
+    if comments:
+        messageText += f'\n\n## Comments'
+        messageText += f'\n*Comments are ordered from newest to oldest*\n'
+        for comment in comments:
+            logging.info(comment)
+            messageText += f'\n{comment}'
+
+    return messageText
+
+
 def getTags(dict):
     tags = ["security"]
     verification_tag = getValue(dict, "VerificationTag")
@@ -121,7 +227,10 @@ def getTags(dict):
     return tags
 
 def getValue(dict, key):
-    return f'{dict[key] if key in dict and dict[key] else ""}'
+    if dict:
+        if key in dict:
+            return dict[key]
+    return ""
 
 def nativeSeverityToLevel(argument): 
     switcher = { 
