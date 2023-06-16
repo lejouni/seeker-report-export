@@ -71,7 +71,6 @@ def getVulnerabilities():
                 locationAndLinenumber = codeLocation.split(":")
                 if len(locationAndLinenumber) > 1:
                     lineNumber = int(locationAndLinenumber[1])
-                logging.info(getValue(vulnerability, "SourceType"))
                 if not getValue(vulnerability, "SourceType") == "CVE":
                     artifactLocation = locationAndLinenumber[0].split("(")[0].replace(".", "/")
                 else:
@@ -86,7 +85,6 @@ def getVulnerabilities():
                 artifactLocation = getValue(vulnerability, "CheckerKey")
             if artifactLocation.startswith('/'):
                 artifactLocation = artifactLocation[1::]
-            logging.info(artifactLocation)
             result['locations'] = [{"physicalLocation":{"artifactLocation":{"uri": artifactLocation.replace(" ", "_")},"region":{"startLine":int(lineNumber)}}, "message": {"text": getValue(vulnerability, 'SeekerServerLink')}}]
             result['partialFingerprints'] = {"primaryLocationLineHash": hashlib.sha256((f'{getValue(vulnerability, "SeekerServerLink").split("/")[-1]}').encode(encoding='UTF-8')).hexdigest()}
             #Adding analysis steps to result if stacktrace is true
@@ -210,7 +208,6 @@ def getHelpMarkdown(vulnerability):
         messageText += f'\n\n## Comments'
         messageText += f'\n*Comments are ordered from newest to oldest*\n'
         for comment in comments:
-            logging.info(comment)
             messageText += f'\n{comment}'
 
     return messageText
