@@ -50,7 +50,7 @@ def getVulnerabilities():
             if not rulesId in ruleIds:
                 descriptionMarkdown = getHelpMarkdown(vulnerability)
                 rule = {"id":rulesId, "name": getValue(vulnerability, "VulnerabilityName"), "shortDescription":{"text":f'{getValue(vulnerability, "VulnerabilityName")[:1000]}'}, 
-                    "fullDescription":{"text": description, "markdown": descriptionMarkdown},
+                    "fullDescription":{"text": description, "markdown": description},
                     "help":{"text":description, "markdown":descriptionMarkdown},
                     "properties": {"security-severity": nativeSeverityToNumber(getValue(vulnerability, "Severity").lower()), "tags": getTags(vulnerability)},
                     "defaultConfiguration": {"level" : nativeSeverityToLevel(getValue(vulnerability, "Severity").lower())}}
@@ -115,7 +115,7 @@ def getHelpMarkdown(vulnerability):
     messageText = ""
     #Common info
     messageText += f'## {getValue(vulnerability, "ItemKey")} - {getValue(vulnerability,"VulnerabilityName")}'
-    messageText += f'\n| : {getValue(vulnerability, "ItemKey")} - {getValue(vulnerability,"VulnerabilityName")} : |'
+    messageText += f'\n\n|       |         |'
     messageText += f'\n| :---- |  :----  |'
     messageText += f'\n| Status: | {getValue(vulnerability, "Status")} |'
     verified = getValue(vulnerability, "VerificationTag")
@@ -138,7 +138,7 @@ def getHelpMarkdown(vulnerability):
         lastDetectionSourceName = getValue(vulnerability, "LastDetectionSourceName")
         if lastDetectionSourceName:
             messageText += f'\n| {lastDetectionSourceType}: | {lastDetectionSourceName} |'
-    messageText += f'\n| See in Seeker: | []({getValue(vulnerability, "SeekerServerLink")}) |'
+    messageText += f'\n| See in Seeker: | [{getValue(vulnerability, "ItemKey")}]({getValue(vulnerability, "SeekerServerLink")}) |'
     #Classification
     messageText += f'\n\n## Classification'
     messageText += f'\n|       |         |'
