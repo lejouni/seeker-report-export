@@ -171,8 +171,10 @@ def getHelpMarkdown(vulnerability):
     messageText += f'\n\n## Summary'
     messageText += f'\n{getValue(vulnerability, "Summary")}'
     #Verification proof
-    messageText += f'\n\n## Verification proof'
-    messageText += f'\n{getValue(vulnerability, "VerificationProof")}'
+    verficationProof = getValue(vulnerability, "VerificationProof")
+    if verficationProof:
+        messageText += f'\n\n## Verification proof'
+        messageText += f'\n{verficationProof}'
     #HTTP context
     lastDetectionHttpHeaders = getValue(vulnerability, "LastDetectionHttpHeaders")
     if lastDetectionHttpHeaders:
@@ -191,22 +193,29 @@ def getHelpMarkdown(vulnerability):
             messageText += f"\n```"
     #Remediation
     messageText += f'\n\n## Remediation'
-    messageText += f'\n{getValue(vulnerability, "Remediation")}'
+    remediation = getValue(vulnerability, "Remediation")
+    if remediation:
+        messageText += f'\n{remediation}'
+    else:
+        messageText += "\nNo remediation"
     #Triage history
+    messageText += f'\n\n## Triage history'
     triageEvents = getValue(vulnerability, "TriageEvents")
     if triageEvents:
-        messageText += f'\n\n## Triage history'
         messageText += f'\n*Triage events are ordered from newest to oldest*\n'
         for event in triageEvents:
             messageText += f'\n{event}'
+    else:
+        messageText += f'\nNo triage events yet'
     #Comments
+    messageText += f'\n\n## Comments'
     comments = getValue(vulnerability, "Comments")
     if comments:
-        messageText += f'\n\n## Comments'
         messageText += f'\n*Comments are ordered from newest to oldest*\n'
         for comment in comments:
             messageText += f'\n{comment}'
-
+    else:
+        messageText += f'\nNo comments yet'
     return messageText
 
 
