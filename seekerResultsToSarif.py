@@ -265,7 +265,7 @@ def getTags(dict):
         if cwes:
             for cwe in cwes[:(20-len(tags))]:
                 tags.append(f'external/cwe/cwe-{cwe}')
-    return tags[:20]
+    return tags[:19]
 
 def getValue(dict, key):
     if dict:
