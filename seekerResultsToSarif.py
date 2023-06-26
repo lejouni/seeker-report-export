@@ -307,7 +307,7 @@ def parseStacktrace(stacktrace):
                 sourceWithLinenumber = sourceCodeFile[sourceCodeFile.index('(')+1:sourceCodeFile.index(')')].split(':')
                 if sourceWithLinenumber:
                     sub_event['path'] = sourceWithLinenumber[0].replace(" ", "_")
-                    filepath=find_file(f'{sub_event["path"].split(".")[0]}')
+                    filepath=find_file(f'{sub_event["path"].split(".")[0]}*')
                     if filepath:
                         sub_event['path'] = filepath
                     if len(sourceWithLinenumber) > 1:
