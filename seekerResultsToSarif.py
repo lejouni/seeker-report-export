@@ -258,6 +258,11 @@ def getTags(dict):
         tags.append(verification_tag)
     if custon_tags:
         tags.extend(custon_tags.split(";"))
+    #Adding CWEs
+    cwes = parseCWEs(getValue(dict, "CWE-SANS"))
+    if cwes:
+        for cwe in cwes:
+            tags.append(f'external/cwe/cwe-{cwe}')
     return tags
 
 def getValue(dict, key):
