@@ -258,12 +258,13 @@ def getTags(dict):
         tags.append(verification_tag)
     if custon_tags:
         tags.extend(custon_tags.split(";"))
-    #Adding CWEs
-    cwes = parseCWEs(getValue(dict, "CWE-SANS"))
-    if cwes:
-        for cwe in cwes:
-            tags.append(f'external/cwe/cwe-{cwe}')
-    #There can be max 20 tags
+    #Code QL has 20 tags limit
+    if len(tags) < 20:
+        #Adding CWEs
+        cwes = parseCWEs(getValue(dict, "CWE-SANS"))
+        if cwes:
+            for cwe in cwes[:(20-len(tags))]:
+                tags.append(f'external/cwe/cwe-{cwe}')
     return tags[:20]
 
 def getValue(dict, key):
