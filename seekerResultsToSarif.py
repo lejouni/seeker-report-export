@@ -3,6 +3,8 @@ import json
 import logging
 import argparse
 import sys
+import os
+import fnmatch
 from timeit import default_timer as timer
 import requests
 from operator import itemgetter
@@ -12,6 +14,9 @@ import hashlib
 
 __author__ = "Jouni Lehto"
 __versionro__="0.1.0"
+
+filepaths={}
+triedToFind=[]
 
 #Global variables
 args = None 
@@ -23,6 +28,20 @@ def getHeader():
             'Accept': 'text/plain',
             'Content-Type': '*/*'
         }
+
+def find_file(fileToSearch):
+    if not filepaths.get(fileToSearch) and fileToSearch not in triedToFind:
+        triedToFind.append(fileToSearch)
+        logging.debug(f"Searching {fileToSearch} from {os.getcwd()}")
+        for dirpath, dirnames, filenames in os.walk(os.getcwd()):
+            for basename in filenames:
+                if fnmatch.fnmatch(basename, fileToSearch):
+                    filename = os.path.join(dirpath, basename)
+                    if filename:
+                        filepaths[fileToSearch]=filename[len(os.getcwd())+1::].replace("\\","/")
+                        return filepaths[fileToSearch]
+    elif filepaths.get(fileToSearch):
+        return filepaths[fileToSearch]
 
 def getVulnerabilities():
     global args
@@ -70,14 +89,24 @@ def getVulnerabilities():
                     lineNumber = int(locationAndLinenumber[1])
                 if not getValue(vulnerability, "SourceType") == "CVE":
                     artifactLocation = locationAndLinenumber[0].split("(")[0].replace(".", "/")
+                    filepath=find_file(f'*{artifactLocation.split("/")[-2]}*')
+                    if filepath:
+                        artifactLocation = filepath
                 else:
                     artifactLocation = locationAndLinenumber[0]
             if not artifactLocation:
                 artifactLocation = getValue(vulnerability, 'LastDetectionURL')
+                if artifactLocation:
+                    filepath=find_file(f'{artifactLocation.split("/")[-1]}')
+                    if filepath:
+                        artifactLocation = filepath
             if not artifactLocation:
                 lastDetectionCodeLocation = getValue(vulnerability, 'LastDetectionCodeLocation')
                 if lastDetectionCodeLocation:
                     artifactLocation = lastDetectionCodeLocation.split("(")[0].replace(".", "/")
+                    filepath=find_file(f'*{artifactLocation.split("/")[-2]}*')
+                    if filepath:
+                        artifactLocation = filepath
             if not artifactLocation:
                 artifactLocation = getValue(vulnerability, "CheckerKey")
             if artifactLocation.startswith('/'):
@@ -275,7 +304,9 @@ def parseStacktrace(stacktrace):
                 sourceWithLinenumber = sourceCodeFile[sourceCodeFile.index('(')+1:sourceCodeFile.index(')')].split(':')
                 if sourceWithLinenumber:
                     sub_event['path'] = sourceWithLinenumber[0].replace(" ", "_")
-                    # print(sourceWithLinenumber[0])
+                    filepath=find_file(f'{sub_event["path"]}')
+                    if filepath:
+                        sub_event['path'] = filepath
                     if len(sourceWithLinenumber) > 1:
                         sub_event['linenumber'] = sourceWithLinenumber[1]
                     else:
