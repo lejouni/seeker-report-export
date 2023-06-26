@@ -17,7 +17,7 @@ __versionro__="0.1.1"
 
 filepaths={}
 triedToFind=[]
-exclude_folders=["target,bin"]
+exclude_folders=["target","node_modules","bin"]
 
 #Global variables
 args = None 
@@ -36,7 +36,6 @@ def find_file(fileToSearch):
         for dirpath, dirnames, filenames in os.walk(os.getcwd()):
              # Check if dirpath contains any of the excluded folders
             if exclude_folders and any(ext in dirpath for ext in exclude_folders):
-                logging.debug("SKIPPING: " + dirpath)
                 continue
             for basename in filenames:
                 if fnmatch.fnmatch(basename, fileToSearch):
