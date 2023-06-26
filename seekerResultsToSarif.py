@@ -296,7 +296,7 @@ def parseCWEs(vulnerabilityCodes):
     if vulnerabilityCodes:
         indicators = []
         for indicator in vulnerabilityCodes.split(';'):
-            indicators.append(indicator.split(':')[0])
+            indicators.append(indicator.split(':')[0].split("-")[-1])
         return indicators
 
 def parseStacktrace(stacktrace):
