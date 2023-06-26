@@ -17,6 +17,7 @@ __versionro__="0.1.0"
 
 filepaths={}
 triedToFind=[]
+exclude_folders=["target,bin"]
 
 #Global variables
 args = None 
@@ -32,8 +33,11 @@ def getHeader():
 def find_file(fileToSearch):
     if not filepaths.get(fileToSearch) and fileToSearch not in triedToFind:
         triedToFind.append(fileToSearch)
-        logging.debug(f"Searching {fileToSearch} from {os.getcwd()}")
         for dirpath, dirnames, filenames in os.walk(os.getcwd()):
+             # Check if dirpath contains any of the excluded folders
+            if exclude_folders and any(ext in dirpath for ext in exclude_folders):
+                logging.debug("SKIPPING: " + dirpath)
+                continue
             for basename in filenames:
                 if fnmatch.fnmatch(basename, fileToSearch):
                     filename = os.path.join(dirpath, basename)
@@ -57,7 +61,6 @@ def getVulnerabilities():
     if args.statuses: parameters['statuses'] = args.statuses    
     
     endpoint = "/rest/api/latest/vulnerabilities" + get_parameter_string(parameters)
-    logging.debug(endpoint)
     response = requests.get(args.url+endpoint, headers=getHeader())
     rules, results, ruleIds = [], [], []
     if response.status_code == 200:
@@ -304,7 +307,7 @@ def parseStacktrace(stacktrace):
                 sourceWithLinenumber = sourceCodeFile[sourceCodeFile.index('(')+1:sourceCodeFile.index(')')].split(':')
                 if sourceWithLinenumber:
                     sub_event['path'] = sourceWithLinenumber[0].replace(" ", "_")
-                    filepath=find_file(f'{sub_event["path"]}')
+                    filepath=find_file(f'{sub_event["path"].split(".")[0]}')
                     if filepath:
                         sub_event['path'] = filepath
                     if len(sourceWithLinenumber) > 1:
