@@ -13,7 +13,7 @@ import traceback
 import hashlib
 
 __author__ = "Jouni Lehto"
-__versionro__="0.1.0"
+__versionro__="0.1.1"
 
 filepaths={}
 triedToFind=[]
