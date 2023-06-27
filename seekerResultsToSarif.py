@@ -193,7 +193,7 @@ def getHelpMarkdown(vulnerability):
     if CWE:
         messageText += f'\n| CWE: |'
         for cweClassification in CWE.split(";"):
-            messageText += f'[{cweClassification}](https://cwe.mitre.org/data/definitions/{cweClassification.split(":")[0].split("-")[-1]}.html)\n'
+            messageText += f'[{cweClassification}](https://cwe.mitre.org/data/definitions/{cweClassification.split(":")[0].split("-")[-1]}.html)<br>'
         messageText += f'|'
     GDPR = getValue(vulnerability, "GDPR")
     if GDPR:
