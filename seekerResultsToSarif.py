@@ -17,7 +17,7 @@ __versionro__="0.1.1"
 
 filepaths={}
 triedToFind=[]
-exclude_folders=["target","node_modules","bin"]
+exclude_folders=["target","node_modules","bin","test"]
 
 #Global variables
 args = None 
