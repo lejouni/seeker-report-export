@@ -191,7 +191,10 @@ def getHelpMarkdown(vulnerability):
         messageText += f'\n| PCI-DSS v3.2.1: | {PCIDSS} |'
     CWE = getValue(vulnerability, "CWE-SANS")
     if CWE:
-        messageText += f'\n| CWE: | {CWE} |'
+        messageText += f'\n| CWE: |'
+        for cweClassification in CWE.split(";"):
+            messageText += f'[{cweClassification}](https://cwe.mitre.org/data/definitions/{cweClassification.split(":")[0].split("-")[-1]}.html)\n'
+        messageText += f'|'
     GDPR = getValue(vulnerability, "GDPR")
     if GDPR:
         messageText += f'\n| GDPR: | {GDPR} |'
@@ -265,7 +268,7 @@ def getTags(dict):
         if cwes:
             for cwe in cwes[:(20-len(tags))]:
                 tags.append(f'external/cwe/cwe-{cwe}')
-    return tags[:19]
+    return tags[:20]
 
 def getValue(dict, key):
     if dict:
