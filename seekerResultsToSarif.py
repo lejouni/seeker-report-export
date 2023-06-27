@@ -167,6 +167,10 @@ def getHelpMarkdown(vulnerability):
     codelocation = getValue(vulnerability, "CodeLocation")
     if codelocation:
         messageText += f'\n| Code location: | {codelocation} |'
+    else:
+        lastDetectionCodeLocation = getValue(vulnerability, 'LastDetectionCodeLocation')
+        if lastDetectionCodeLocation:
+             messageText += f'\n| Code location: | {lastDetectionCodeLocation} |'
     lastDetectionSourceType = getValue(vulnerability, "LastDetectionSourceType")
     if lastDetectionSourceType:
         lastDetectionSourceName = getValue(vulnerability, "LastDetectionSourceName")
