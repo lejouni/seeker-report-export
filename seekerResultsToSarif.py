@@ -191,7 +191,7 @@ def getHelpMarkdown(vulnerability):
         messageText += f'\n| PCI-DSS v3.2.1: | {PCIDSS} |'
     CWE = getValue(vulnerability, "CWE-SANS")
     if CWE:
-        messageText += f'\n| CWE: |'
+        messageText += f'\n| CWE: | '
         for cweClassification in CWE.split(";"):
             messageText += f'[{cweClassification}](https://cwe.mitre.org/data/definitions/{cweClassification.split(":")[0].split("-")[-1]}.html)<br>'
         messageText += f'|'
@@ -200,7 +200,10 @@ def getHelpMarkdown(vulnerability):
         messageText += f'\n| GDPR: | {GDPR} |'
     CAPEC = getValue(vulnerability, "CAPEC")
     if CAPEC:
-        messageText += f'\n| CAPEC: | {CAPEC} |'
+        messageText += f'\n| CAPEC: | '
+        for capecClassification in CAPEC.split(";"):
+            messageText += f'{capecClassification}<br>'
+        messageText += f'|'
     #Summary
     messageText += f'\n\n## Summary'
     messageText += f'\n{getValue(vulnerability, "Summary")}'
