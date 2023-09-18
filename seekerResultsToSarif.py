@@ -13,7 +13,7 @@ import traceback
 import hashlib
 
 __author__ = "Jouni Lehto"
-__versionro__="0.1.1"
+__versionro__="0.1.2"
 
 filepaths={}
 triedToFind=[]
@@ -91,7 +91,11 @@ def getVulnerabilities():
                     lineNumber = int(locationAndLinenumber[1])
                 if not getValue(vulnerability, "SourceType") == "CVE":
                     artifactLocation = locationAndLinenumber[0].split("(")[0].replace(".", "/")
-                    filepath=find_file(f'*{artifactLocation.split("/")[-2]}*')
+                    logging.debug(artifactLocation)
+                    if len(artifactLocation.split("/")) > 2:
+                        filepath=find_file(f'*{artifactLocation.split("/")[-2]}*')
+                    else:
+                        filepath=find_file(f'*{artifactLocation.split("/")[-1]}*')
                     if filepath:
                         artifactLocation = filepath
                 else:
@@ -106,7 +110,10 @@ def getVulnerabilities():
                 lastDetectionCodeLocation = getValue(vulnerability, 'LastDetectionCodeLocation')
                 if lastDetectionCodeLocation:
                     artifactLocation = lastDetectionCodeLocation.split("(")[0].replace(".", "/")
-                    filepath=find_file(f'*{artifactLocation.split("/")[-2]}*')
+                    if len(artifactLocation.split("/")) > 2:
+                        filepath=find_file(f'*{artifactLocation.split("/")[-2]}*')
+                    else:
+                        filepath=find_file(f'*{artifactLocation.split("/")[-1]}*')
                     if filepath:
                         artifactLocation = filepath
             if not artifactLocation:
@@ -316,7 +323,7 @@ def parseStacktrace(stacktrace):
         stacktraceLines = stacktrace.split('\n')
         eventNumber = 1
         for sourceCodeFile in stacktraceLines:
-            if sourceCodeFile:
+            if sourceCodeFile and sourceCodeFile.index('('):
                 sub_event = {}
                 sub_event['event-number'] = eventNumber
                 sub_event['message'] = sourceCodeFile[0:sourceCodeFile.index('(')]
