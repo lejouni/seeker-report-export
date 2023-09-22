@@ -323,11 +323,16 @@ def parseStacktrace(stacktrace):
         stacktraceLines = stacktrace.split('\n')
         eventNumber = 1
         for sourceCodeFile in stacktraceLines:
-            if sourceCodeFile and sourceCodeFile.index('('):
+            if sourceCodeFile:
                 sub_event = {}
                 sub_event['event-number'] = eventNumber
-                sub_event['message'] = sourceCodeFile[0:sourceCodeFile.index('(')]
-                sourceWithLinenumber = sourceCodeFile[sourceCodeFile.index('(')+1:sourceCodeFile.index(')')].split(':')
+                if '(' in sourceCodeFile:
+                    sub_event['message'] = sourceCodeFile[0:sourceCodeFile.index('(')]
+                else:
+                    sub_event['message'] = sourceCodeFile
+                if '(' in sourceCodeFile and ')' in sourceCodeFile:
+                    sourceWithLinenumber = sourceCodeFile[sourceCodeFile.index('(')+1:sourceCodeFile.index(')')].split(':')
+                    
                 if sourceWithLinenumber:
                     sub_event['path'] = sourceWithLinenumber[0].replace(" ", "_")
                     filepath=find_file(f'{sub_event["path"].split(".")[0]}*')
