@@ -13,7 +13,7 @@ import traceback
 import hashlib
 
 __author__ = "Jouni Lehto"
-__versionro__="0.1.2"
+__versionro__="0.1.3"
 
 filepaths={}
 triedToFind=[]
@@ -268,7 +268,7 @@ def getHelpMarkdown(vulnerability):
 
 
 def getTags(dict):
-    tags = ["security"]
+    tags = ["security", "IAST"]
     verification_tag = getValue(dict, "VerificationTag")
     custon_tags = getValue(dict, "CustomTags")
     if verification_tag and not verification_tag == "Untagged":
