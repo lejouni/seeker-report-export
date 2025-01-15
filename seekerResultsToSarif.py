@@ -88,7 +88,10 @@ def getVulnerabilities():
             if codeLocation:
                 locationAndLinenumber = codeLocation.split(":")
                 if len(locationAndLinenumber) > 1:
-                    lineNumber = int(locationAndLinenumber[1])
+                    try:
+                        lineNumber = int(locationAndLinenumber[1])
+                    except ValueError as e:
+                        lineNumber = 1
                 if not getValue(vulnerability, "SourceType") == "CVE":
                     artifactLocation = locationAndLinenumber[0].split("(")[0].replace(".", "/")
                     logging.debug(artifactLocation)
