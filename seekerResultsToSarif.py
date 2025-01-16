@@ -83,7 +83,7 @@ def getVulnerabilities():
             result['ruleId'] = rulesId
             #If CodeLocation has linenumber then it is used otherwise linenumber is 1
             lineNumber = 1
-            artifactLocation = ""
+            artifactLocation = "no_location_found"
             codeLocation = getValue(vulnerability, 'CodeLocation')
             if codeLocation:
                 locationAndLinenumber = codeLocation.split(":")
@@ -151,9 +151,8 @@ def getVulnerabilities():
     else:
         logging.error("Seeker response code: " + response.status_code)
 
-def escapeSpecialCharacters(value: str):
-    replacements = str.maketrans({" ": "_", ";": "_", ":": "_", ",": "_"})
-    return value.translate(replacements)
+def escapeSpecialCharacters(argument: str):
+    return argument.translate(str.maketrans({" ": "_", ";": "_", ":": "_", ",": "_"})) if argument else argument
 
 def getHelpMarkdown(vulnerability):
     messageText = ""
@@ -340,7 +339,7 @@ def parseStacktrace(stacktrace):
                     sourceWithLinenumber = sourceCodeFile[sourceCodeFile.index('(')+1:sourceCodeFile.index(')')].split(':')
                     
                 if sourceWithLinenumber:
-                    sub_event['path'] = escapeSpecialCharacters(sourceWithLinenumber[0])
+                    sub_event['path'] = sourceWithLinenumber[0] if escapeSpecialCharacters(sourceWithLinenumber[0]) else "no_location_found"
                     filepath=find_file(f'{sub_event["path"].split(".")[0]}*')
                     if filepath:
                         sub_event['path'] = filepath
