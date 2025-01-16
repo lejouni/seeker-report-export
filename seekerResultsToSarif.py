@@ -13,7 +13,7 @@ import traceback
 import hashlib
 
 __author__ = "Jouni Lehto"
-__versionro__="0.1.3"
+__versionro__="0.1.4"
 
 filepaths={}
 triedToFind=[]
@@ -123,7 +123,7 @@ def getVulnerabilities():
                 artifactLocation = getValue(vulnerability, "CheckerKey")
             if artifactLocation.startswith('/'):
                 artifactLocation = artifactLocation[1::]
-            result['locations'] = [{"physicalLocation":{"artifactLocation":{"uri": artifactLocation.replace(" ", "_")},"region":{"startLine":int(lineNumber)}}, "message": {"text": getValue(vulnerability, 'SeekerServerLink')}}]
+            result['locations'] = [{"physicalLocation":{"artifactLocation":{"uri": escapeSpecialCharacters(artifactLocation)},"region":{"startLine":int(lineNumber)}}, "message": {"text": getValue(vulnerability, 'SeekerServerLink')}}]
             result['partialFingerprints'] = {"primaryLocationLineHash": hashlib.sha256((f'{getValue(vulnerability, "SeekerServerLink").split("/")[-1]}').encode(encoding='UTF-8')).hexdigest()}
             #Adding analysis steps to result if stacktrace is true
             if args.stacktrace:
@@ -151,6 +151,9 @@ def getVulnerabilities():
     else:
         logging.error("Seeker response code: " + response.status_code)
 
+def escapeSpecialCharacters(value: str):
+    replacements = str.maketrans({" ": "_", ";": "_", ":": "_", ",": "_"})
+    return value.translate(replacements)
 
 def getHelpMarkdown(vulnerability):
     messageText = ""
@@ -337,7 +340,7 @@ def parseStacktrace(stacktrace):
                     sourceWithLinenumber = sourceCodeFile[sourceCodeFile.index('(')+1:sourceCodeFile.index(')')].split(':')
                     
                 if sourceWithLinenumber:
-                    sub_event['path'] = sourceWithLinenumber[0].replace(" ", "_")
+                    sub_event['path'] = escapeSpecialCharacters(sourceWithLinenumber[0])
                     filepath=find_file(f'{sub_event["path"].split(".")[0]}*')
                     if filepath:
                         sub_event['path'] = filepath
