@@ -60,7 +60,7 @@ def getVulnerabilities():
     if args.statuses: parameters['statuses'] = args.statuses    
     
     endpoint = "/rest/api/latest/vulnerabilities" + get_parameter_string(parameters)
-    response = requests.get(args.url+endpoint, headers=getHeader())
+    response = requests.get(args.url+endpoint, headers=getHeader(), verify=args.verify_ssl)
     rules, results, ruleIds = [], [], []
     if response.status_code == 200:
         for vulnerability in response.json():
@@ -381,6 +381,7 @@ def main():
         #Parse commandline arguments
         parser.add_argument('--url', help="Baseurl for Seeker server", required=True)
         parser.add_argument('--token', help="Seeker Access token", required=True)
+        parser.add_argument('--verify_ssl', help="Verify SSL certificates", required=False, default=True, type=str2bool)
         parser.add_argument('--project', help="Seeker project name", required=True)
         parser.add_argument('--version', help="Seeker project version name", required=False)
         parser.add_argument('--outputFile', help="Filename with path where it will be created, example: /tmp/seekerFindings.sarif.json \
@@ -398,6 +399,9 @@ def main():
         logging.basicConfig(format='%(asctime)s:%(levelname)s:%(module)s: %(message)s', stream=sys.stderr, level=args.log_level)
         logging.getLogger("requests").setLevel(logging.WARNING)
         logging.getLogger("urllib3").setLevel(logging.WARNING)
+        if not args.verify_ssl:
+            import urllib3
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         #Printing out the version number
         logging.info("Seeker results to SARIF formatter version: " + __versionro__)
         if logging.getLogger().isEnabledFor(logging.DEBUG): logging.debug(f'Given params are: {args}')

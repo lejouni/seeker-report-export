@@ -50,6 +50,10 @@ inputs:
     description: Comma-separated list of vulnerability status keys to be included.
     required: false
     default: Detected,Reviewed
+  verify_ssl:
+    description: Verify SSL certificates. Options are true or false.
+    required: false
+    default: true
         
 runs:
   using: composite
@@ -57,7 +61,7 @@ runs:
     - if: ${{inputs.format == 'sarif'}}
       # Run the Python script
       run: |
-        python3 ${{github.action_path}}/seekerResultsToSarif.py --statuses="${{inputs.statuses}}" --log_level="${{inputs.log_level}}" --outputFile="${{inputs.outputfile}}" --url="${{inputs.url}}" --token="${{inputs.token}}" --project="${{inputs.project}}" --version="${{inputs.version}}" --codeLocationTypeKeys="${{inputs.codeLocationTypeKeys}}" --minSeverity="${{inputs.minSeverity}}" --onlySeekerVerified="${{inputs.onlySeekerVerified}}" --stacktrace="${{inputs.stacktrace}}" --customTagNames="${{inputs.customTagNames}}"
+        python3 ${{github.action_path}}/seekerResultsToSarif.py  --verify_ssl="${{inputs.verify_ssl}}" --statuses="${{inputs.statuses}}" --log_level="${{inputs.log_level}}" --outputFile="${{inputs.outputfile}}" --url="${{inputs.url}}" --token="${{inputs.token}}" --project="${{inputs.project}}" --version="${{inputs.version}}" --codeLocationTypeKeys="${{inputs.codeLocationTypeKeys}}" --minSeverity="${{inputs.minSeverity}}" --onlySeekerVerified="${{inputs.onlySeekerVerified}}" --stacktrace="${{inputs.stacktrace}}" --customTagNames="${{inputs.customTagNames}}"
       shell: bash
     - if: ${{inputs.format == 'pdf'}}
       run: |

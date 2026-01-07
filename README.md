@@ -20,6 +20,7 @@ This Github Action expects that you have run the Seeker analysis and you have ac
 | outputfile | Filename with path where it will be created, example /tmp/SeekerResults.sarif.json. NOTE! Must be given for PDF -format | ${{github.workspace}}/SeekerResults.sarif.json | false | X | X |
 | format | Select which format output will be. Options are sarif and pdf | sarif | false | X | X |
 | statuses | Comma-separated list of vulnerability status keys to be included | Detected,Reviewed | false | X |  |
+| verify_ssl | Verify SSL certificates | true | false | X | X |
 
 ## Usage examples
 Get Sarif -format report
@@ -34,14 +35,14 @@ Get Sarif -format report
         stacktrace: true
 
     - name: Upload SARIF file
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       with:
         # Path to SARIF file
         sarif_file: ${{github.workspace}}/SeekerResults.sarif.json
       continue-on-error: true
 
     - name: Archive scanning results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v6
       with:
         name: seeker-analysis-results
         path: ${{github.workspace}}/SeekerResults.sarif.json
@@ -60,7 +61,7 @@ Get PDF -format report
         outputfile: ${{github.workspace}}/SeekerResults.pdf #With format: pdf, this must be given.
 
     - name: Archive scanning results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v6
       with:
         name: seeker-analysis-results
         path: ${{github.workspace}}/SeekerResults.pdf
