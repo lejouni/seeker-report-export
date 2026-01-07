@@ -26,7 +26,7 @@ This Github Action expects that you have run the Seeker analysis and you have ac
 Get Sarif -format report
 ```yaml
     - name: Get results from Seeker
-      uses: lejouni/seeker-report-export@main
+      uses: lejouni/seeker-report-export@v1
       with:
         url: ${{secrets.SEEKER_SERVER_URL}}
         token: ${{secrets.SEEKER_ACCESS_TOKEN}}
@@ -52,7 +52,7 @@ Get Sarif -format report
 Get PDF -format report
 ```yaml
     - name: Get results from Seeker
-      uses: lejouni/seeker-report-export@main
+      uses: lejouni/seeker-report-export@v1
       with:
         url: ${{secrets.SEEKER_SERVER_URL}}
         token: ${{secrets.SEEKER_ACCESS_TOKEN}}
