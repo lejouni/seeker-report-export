@@ -13,7 +13,7 @@ import traceback
 import hashlib
 
 __author__ = "Jouni Lehto"
-__versionro__="0.1.4"
+__versionro__="0.1.5"
 
 filepaths={}
 triedToFind=[]
@@ -344,7 +344,7 @@ def parseStacktrace(stacktrace):
                     if filepath:
                         sub_event['path'] = filepath
                     if len(sourceWithLinenumber) > 1:
-                        sub_event['linenumber'] = sourceWithLinenumber[1]
+                        sub_event['linenumber'] = sourceWithLinenumber[1] if isinstance(sourceWithLinenumber[1], int) else 1
                     else:
                         sub_event['linenumber'] = 1
                 sub_events.append(sub_event)
@@ -409,7 +409,7 @@ def main():
         sarif_json = getSarifJsonHeader()
         results = {}
         results['results'] = findings
-        results['tool'] = getSarifJsonFooter("Synopsys Seeker", rules)
+        results['tool'] = getSarifJsonFooter("Seeker", rules)
         runs = []
         runs.append(results)
         sarif_json['runs'] = runs
