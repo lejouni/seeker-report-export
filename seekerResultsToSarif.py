@@ -60,8 +60,6 @@ def getVulnerabilities():
     if args.statuses: parameters['statuses'] = args.statuses    
     
     endpoint = "/rest/api/latest/vulnerabilities" + get_parameter_string(parameters)
-    if logging.getLogger().isEnabledFor(logging.DEBUG): 
-        logging.debug(f'Requesting vulnerabilities with endpoint: {args.url+endpoint}')
     response = requests.get(args.url+endpoint, headers=getHeader(), verify=args.verify_ssl)
     rules, results, ruleIds = [], [], []
     if response.status_code == 200:
@@ -406,6 +404,9 @@ def main():
         if not args.verify_ssl:
             import urllib3
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        # Removing trailing slash if given
+        if args.url.endswith('/'):
+            args.url = args.url[:-1]
         #Printing out the version number
         logging.info("Seeker results to SARIF formatter version: " + __versionro__)
         if logging.getLogger().isEnabledFor(logging.DEBUG): logging.debug(f'Given params are: {args}')
