@@ -60,6 +60,8 @@ def getVulnerabilities():
     if args.statuses: parameters['statuses'] = args.statuses    
     
     endpoint = "/rest/api/latest/vulnerabilities" + get_parameter_string(parameters)
+    if logging.getLogger().isEnabledFor(logging.DEBUG): 
+        logging.debug(f'Requesting vulnerabilities with endpoint: {args.url+endpoint}')
     response = requests.get(args.url+endpoint, headers=getHeader(), verify=args.verify_ssl)
     rules, results, ruleIds = [], [], []
     if response.status_code == 200:
