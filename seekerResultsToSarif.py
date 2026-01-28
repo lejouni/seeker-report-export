@@ -55,7 +55,7 @@ def getVulnerabilities():
     if args.codeLocationTypeKeys: parameters['codeLocationTypeKeys'] = args.codeLocationTypeKeys.upper()
     if args.minSeverity: parameters['minSeverity'] = args.minSeverity.upper()
     if args.onlySeekerVerified: parameters['onlySeekerVerified'] = args.onlySeekerVerified
-    if args.customTagNames: parameters['codeLocationTypeKeys'] = args.customTagNames
+    if args.customTagNames: parameters['customTagNames'] = args.customTagNames
     if args.version: parameters['projectVersions'] = args.version
     if args.statuses: parameters['statuses'] = args.statuses    
     
@@ -143,13 +143,15 @@ def getVulnerabilities():
             results.append(result)
         return results, rules
     elif response.status_code == 400:
+        logging.error(f"Bad request to Seeker API. Please check the given parameters. Response code:{response.status_code}, content: {response.content.decode('utf-8')}")
         logging.info("No vulnerabilities found!")
         return results, rules
     elif response.status_code == 404:
+        logging.error(f"Project keys or version names not found. Response code:{response.status_code}, content: {response.content.decode('utf-8')}")
         logging.info("Project keys or version names not found.")
         return results, rules
     else:
-        logging.error("Seeker response code: " + response.status_code)
+        logging.error(f"Seeker response code: {response.status_code}, content: {response.content.decode('utf-8')}")
 
 def escapeSpecialCharacters(argument: str):
     return argument.translate(str.maketrans({" ": "_", ";": "_", ":": "_", ",": "_"})) if argument else argument
